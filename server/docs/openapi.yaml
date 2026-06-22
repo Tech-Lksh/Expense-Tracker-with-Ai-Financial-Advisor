@@ -1,0 +1,440 @@
+openapi: 3.0.3
+info:
+  title: Advanced Expense Tracker API
+  description: >
+    Production-grade 3-tier backend for the Advanced Expense Tracker,
+    with Google Maps location intelligence (place autocomplete, geocoding,
+    nearby-expense search, and map-view data).
+  version: 1.0.0
+servers:
+  - url: /api/v1
+tags:
+  - name: Auth
+  - name: Categories
+  - name: Expenses
+  - name: Budgets
+  - name: Recurring Rules
+  - name: Analytics
+  - name: Locations
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Location:
+      type: object
+      properties:
+        placeId: { type: string }
+        lat: { type: number }
+        lng: { type: number }
+      description: Provide either placeId (from autocomplete) or lat+lng (from GPS/map pin).
+    Expense:
+      type: object
+      properties:
+        _id: { type: string }
+        amount: { type: number }
+        currency: { type: string, example: INR }
+        type: { type: string, enum: [expense, income] }
+        category: { type: object }
+        note: { type: string }
+        date: { type: string, format: date-time }
+        location:
+          type: object
+          nullable: true
+          properties:
+            type: { type: string, example: Point }
+            coordinates:
+              type: array
+              items: { type: number }
+              example: [77.4126, 23.2599]
+            formattedAddress: { type: string }
+            name: { type: string }
+
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Create a new account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name: { type: string }
+                email: { type: string }
+                password: { type: string, minLength: 8 }
+      responses:
+        "201": { description: Account created }
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Log in with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        "200": { description: Logged in }
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Exchange a refresh token (cookie or body) for a new access token
+      responses:
+        "200": { description: Token refreshed }
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Invalidate the current refresh token
+      responses:
+        "200": { description: Logged out }
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Get the authenticated user's profile
+      responses:
+        "200": { description: Current user }
+
+  /categories:
+    get:
+      tags: [Categories]
+      summary: List the authenticated user's categories
+      responses:
+        "200": { description: List of categories }
+    post:
+      tags: [Categories]
+      summary: Create a category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string }
+                icon: { type: string }
+                colorCode: { type: string }
+      responses:
+        "201": { description: Category created }
+
+  /categories/{id}:
+    patch:
+      tags: [Categories]
+      summary: Update a category
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Category updated }
+    delete:
+      tags: [Categories]
+      summary: Delete a category
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Category deleted }
+
+  /expenses:
+    get:
+      tags: [Expenses]
+      summary: List expenses (paginated, filterable by date range/category/type)
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer }
+        - in: query
+          name: limit
+          schema: { type: integer }
+        - in: query
+          name: from
+          schema: { type: string, format: date }
+        - in: query
+          name: to
+          schema: { type: string, format: date }
+        - in: query
+          name: category
+          schema: { type: string }
+        - in: query
+          name: type
+          schema: { type: string, enum: [expense, income] }
+      responses:
+        "200": { description: Paginated list of expenses }
+    post:
+      tags: [Expenses]
+      summary: Create an expense, optionally tagged with a Google Maps location
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [categoryId, amount]
+              properties:
+                categoryId: { type: string }
+                amount: { type: number }
+                type: { type: string, enum: [expense, income] }
+                currency: { type: string }
+                note: { type: string }
+                date: { type: string, format: date-time }
+                tags:
+                  type: array
+                  items: { type: string }
+                location:
+                  $ref: "#/components/schemas/Location"
+      responses:
+        "201":
+          description: Expense created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Expense"
+
+  /expenses/nearby:
+    get:
+      tags: [Expenses]
+      summary: Find the user's past expenses near a given coordinate (Google Maps geospatial query)
+      parameters:
+        - in: query
+          name: lat
+          required: true
+          schema: { type: number }
+        - in: query
+          name: lng
+          required: true
+          schema: { type: number }
+        - in: query
+          name: radiusKm
+          schema: { type: number, default: 5 }
+      responses:
+        "200": { description: Nearby expenses sorted by distance }
+
+  /expenses/map-data:
+    get:
+      tags: [Expenses]
+      summary: Lightweight geotagged expense list for rendering a map/heatmap view
+      responses:
+        "200": { description: "Lightweight array of amount, category, location, and date for map rendering" }
+
+  /expenses/{id}:
+    get:
+      tags: [Expenses]
+      summary: Get a single expense
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Expense }
+    patch:
+      tags: [Expenses]
+      summary: Update an expense
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Expense updated }
+    delete:
+      tags: [Expenses]
+      summary: Delete an expense
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Expense deleted }
+
+  /budgets:
+    get:
+      tags: [Budgets]
+      summary: List budgets for a given month/year
+      parameters:
+        - in: query
+          name: month
+          required: true
+          schema: { type: integer }
+        - in: query
+          name: year
+          required: true
+          schema: { type: integer }
+      responses:
+        "200": { description: List of budgets }
+    post:
+      tags: [Budgets]
+      summary: Create a monthly budget for a category
+      responses:
+        "201": { description: Budget created }
+
+  /budgets/{id}:
+    patch:
+      tags: [Budgets]
+      summary: Update a budget
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Budget updated }
+    delete:
+      tags: [Budgets]
+      summary: Delete a budget
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Budget deleted }
+
+  /recurring-rules:
+    get:
+      tags: [Recurring Rules]
+      summary: List recurring expense rules
+      responses:
+        "200": { description: List of rules }
+    post:
+      tags: [Recurring Rules]
+      summary: Create a recurring expense rule (e.g. monthly gym membership)
+      responses:
+        "201": { description: Rule created }
+
+  /recurring-rules/{id}:
+    patch:
+      tags: [Recurring Rules]
+      summary: Update a recurring rule
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Rule updated }
+    delete:
+      tags: [Recurring Rules]
+      summary: Delete a recurring rule
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Rule deleted }
+
+  /analytics/category-breakdown:
+    get:
+      tags: [Analytics]
+      summary: Spend grouped by category for a date range
+      parameters:
+        - in: query
+          name: from
+          schema: { type: string, format: date }
+        - in: query
+          name: to
+          schema: { type: string, format: date }
+      responses:
+        "200": { description: Category breakdown }
+
+  /analytics/monthly-trend:
+    get:
+      tags: [Analytics]
+      summary: Total spend per month for the last N months
+      parameters:
+        - in: query
+          name: monthsBack
+          schema: { type: integer, default: 6 }
+      responses:
+        "200": { description: Monthly trend series }
+
+  /locations/autocomplete:
+    get:
+      tags: [Locations]
+      summary: Google Places Autocomplete — search-as-you-type place suggestions
+      parameters:
+        - in: query
+          name: input
+          required: true
+          schema: { type: string }
+        - in: query
+          name: lat
+          schema: { type: number }
+        - in: query
+          name: lng
+          schema: { type: number }
+      responses:
+        "200": { description: List of place predictions }
+
+  /locations/place-details:
+    get:
+      tags: [Locations]
+      summary: Resolve a Google placeId to coordinates + formatted address
+      parameters:
+        - in: query
+          name: placeId
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Place details }
+
+  /locations/geocode:
+    post:
+      tags: [Locations]
+      summary: Forward geocode a free-text address to coordinates
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [address]
+              properties:
+                address: { type: string }
+      responses:
+        "200": { description: Geocoded coordinates }
+
+  /locations/reverse-geocode:
+    post:
+      tags: [Locations]
+      summary: Reverse geocode coordinates to a formatted address
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [lat, lng]
+              properties:
+                lat: { type: number }
+                lng: { type: number }
+      responses:
+        "200": { description: Formatted address }

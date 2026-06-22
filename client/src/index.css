@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply h-full bg-slate-950 text-slate-200 antialiased font-sans;
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', sans-serif;
+  }
+}
+
+/* Custom leaflet popup overrides for dark theme */
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+  background: #0f172a !important; /* bg-slate-900 */
+  color: #f1f5f9 !important; /* text-slate-100 */
+  border: 1px solid #334155; /* border-slate-700 */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5) !important;
+}
+
+.leaflet-popup-close-button {
+  color: #94a3b8 !important; /* text-slate-400 */
+}
+
+/* Custom input style to suppress number spin buttons */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Animated route lines from user to expenses */
+.pulse-route-line {
+  stroke-dasharray: 8, 8;
+  animation: routeFlow 25s linear infinite;
+  stroke-linecap: round;
+}
+
+@keyframes routeFlow {
+  from {
+    stroke-dashoffset: 500;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Tooltip custom styling for Leaflet */
+.leaflet-tooltip-dark {
+  background: #0f172a !important;
+  color: #f1f5f9 !important;
+  border: 1px solid #334155 !important;
+  border-radius: 8px !important;
+  padding: 6px 10px !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5) !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+}
+
+.leaflet-tooltip-left::before {
+  border-left-color: #334155 !important;
+}
+.leaflet-tooltip-right::before {
+  border-right-color: #334155 !important;
+}

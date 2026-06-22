@@ -1,0 +1,58 @@
+{
+  "name": "expense-tracker-backend",
+  "version": "1.0.0",
+  "description": "Production-grade 3-tier backend for the Advanced Expense Tracker, with Google Maps location intelligence.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "cross-env NODE_ENV=test jest --runInBand --detectOpenHandles",
+    "test:watch": "cross-env NODE_ENV=test jest --watch",
+    "lint": "eslint src --ext .js",
+    "format": "prettier --write \"src/**/*.js\""
+  },
+  "keywords": [
+    "expense-tracker",
+    "mern",
+    "nodejs",
+    "express",
+    "mongodb",
+    "google-maps"
+  ],
+  "author": "Lokesh",
+  "license": "MIT",
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "@googlemaps/google-maps-services-js": "^3.4.0",
+    "bcryptjs": "^2.4.3",
+    "bullmq": "^5.7.0",
+    "compression": "^1.7.4",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^7.2.0",
+    "helmet": "^7.1.0",
+    "hpp": "^0.2.3",
+    "ioredis": "^5.4.1",
+    "joi": "^17.13.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.3.0",
+    "morgan": "^1.10.0",
+    "swagger-ui-express": "^5.0.0",
+    "winston": "^3.13.0",
+    "yamljs": "^0.3.0"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "eslint": "^8.57.1",
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.14",
+    "prettier": "^3.2.5",
+    "supertest": "^7.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
