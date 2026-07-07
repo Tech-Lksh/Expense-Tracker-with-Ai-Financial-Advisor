@@ -148,13 +148,13 @@ export const Layout = ({ children }) => {
         )}
 
         {/* Main Content Area */}
-        <main className={`flex-1 relative bg-slate-950 focus:outline-none ${currentPath === '#ai-advisor'
-            ? 'overflow-hidden p-4 md:p-6 flex flex-col'
-            : 'overflow-y-auto p-4 md:p-8'
+        <main className={`flex-1 relative bg-slate-950 focus:outline-none flex flex-col ${currentPath === '#ai-advisor'
+            ? 'overflow-hidden p-4 md:p-6 pb-2'
+            : 'overflow-y-auto p-4 md:p-8 pb-4'
           }`}>
           {/* Dashboard Page Header */}
           {currentPath !== '#ai-advisor' && (
-            <div className="hidden md:flex items-center justify-between mb-8">
+            <div className="hidden md:flex items-center justify-between mb-8 flex-shrink-0">
               <div>
                 <h1 className="text-3xl font-extrabold text-white tracking-tight leading-none mb-1">
                   {getPageTitle()}
@@ -172,9 +172,30 @@ export const Layout = ({ children }) => {
             </div>
           )}
 
-          <div className={`w-full ${currentPath === '#ai-advisor' ? 'h-full min-h-0 flex flex-col' : ''}`}>
+          <div className={`w-full flex-1 ${currentPath === '#ai-advisor' ? 'min-h-0 flex flex-col' : ''}`}>
             {children}
           </div>
+
+          {/* Premium Footer */}
+          <footer className="w-full border-t border-slate-800/50 bg-slate-900/20 bg-grid-pattern py-4 px-4 mt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4 flex-shrink-0 rounded-xl">
+            <div className="flex items-center space-x-1">
+              <span>&copy; {new Date().getFullYear()} <strong className="text-slate-400 font-semibold">SpendWise</strong>. All rights reserved.</span>
+            </div>
+            <div className="flex items-center space-x-4">
+              <span className="flex items-center gap-1.5">
+                Made with <span className="text-red-500 animate-pulse">❤️</span> by <strong className="text-slate-300 font-semibold">Lokesh Pardhi</strong>
+              </span>
+              <div className="h-4 w-px bg-slate-800 hidden sm:block"></div>
+              <div className="flex items-center space-x-3">
+                <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors" title="GitHub">
+                  <Icons.GitHub className="w-4 h-4" />
+                </a>
+                <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors" title="LinkedIn">
+                  <Icons.LinkedIn className="w-4 h-4" />
+                </a>
+              </div>
+            </div>
+          </footer>
         </main>
       </div>
 

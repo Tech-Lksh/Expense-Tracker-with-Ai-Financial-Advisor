@@ -6,13 +6,18 @@ const logger = require("./logger");
 // We create one shared connection factory so caching and queues reuse config
 // without duplicating connection logic across the codebase.
 function createRedisConnection({ forBullMQ = false } = {}) {
-  const client = new Redis({
-    host: redisConfig.host,
-    port: redisConfig.port,
-    password: redisConfig.password,
-    maxRetriesPerRequest: forBullMQ ? null : 3,
-    lazyConnect: env === "test",
-  });
+  const client = redisConfig.url
+    ? new Redis(redisConfig.url, {
+        maxRetriesPerRequest: forBullMQ ? null : 3,
+        lazyConnect: env === "test",
+      })
+    : new Redis({
+        host: redisConfig.host,
+        port: redisConfig.port,
+        password: redisConfig.password,
+        maxRetriesPerRequest: forBullMQ ? null : 3,
+        lazyConnect: env === "test",
+      });
 
   client.on("error", (err) => {
     logger.error(`Redis connection error: ${err.message}`);

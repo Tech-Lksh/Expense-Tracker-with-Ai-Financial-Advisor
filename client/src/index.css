@@ -70,3 +70,11 @@ input[type="number"] {
 .leaflet-tooltip-right::before {
   border-right-color: #334155 !important;
 }
+
+/* Premium subtle grid pattern for backgrounds and footers */
+.bg-grid-pattern {
+  background-size: 30px 30px;
+  background-image: 
+    linear-gradient(to right, rgba(51, 65, 85, 0.15) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(51, 65, 85, 0.15) 1px, transparent 1px);
+}

@@ -1,4 +1,4 @@
-const BASE_URL = 'https://expense-tracker-with-ai-financial-advisor.onrender.com/api/v1';
+const BASE_URL = import.meta.env.VITE_API_URL || 'https://expense-tracker-with-ai-financial-advisor.onrender.com/api/v1';
 
 let tokenStore = {
   accessToken: localStorage.getItem('accessToken') || null,

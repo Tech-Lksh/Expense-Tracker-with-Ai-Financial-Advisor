@@ -104,14 +104,15 @@ export const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-100 px-4 py-12 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col justify-between bg-slate-950 text-slate-100 relative overflow-hidden">
       
       {/* Background soft glowing highlights */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl -z-10 pointer-events-none animate-pulse"></div>
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl -z-10 pointer-events-none animate-pulse delay-700"></div>
 
       {/* Main card wrapper */}
-      <div className="w-full max-w-md bg-slate-900/60 border border-slate-800/80 rounded-2xl p-8 backdrop-blur-xl shadow-2xl">
+      <div className="flex-1 flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md bg-slate-900/60 border border-slate-800/80 rounded-2xl p-8 backdrop-blur-xl shadow-2xl">
         
         {/* Header Branding */}
         <div className="text-center mb-8">
@@ -315,8 +316,29 @@ export const Auth = () => {
             )}
           </p>
         </div>
-
       </div>
+      </div>
+
+      {/* Premium Footer */}
+      <footer className="w-full border-t border-slate-800/50 bg-slate-900/20 bg-grid-pattern py-4 px-4 md:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4 z-10">
+        <div className="flex items-center space-x-1">
+          <span>&copy; {new Date().getFullYear()} <strong className="text-slate-400 font-semibold">SpendWise</strong>. All rights reserved.</span>
+        </div>
+        <div className="flex items-center space-x-4">
+          <span className="flex items-center gap-1.5">
+            Made with <span className="text-red-500 animate-pulse">❤️</span> by <strong className="text-slate-300 font-semibold">Lokesh Pardhi</strong>
+          </span>
+          <div className="h-4 w-px bg-slate-800 hidden sm:block"></div>
+          <div className="flex items-center space-x-3">
+            <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors" title="GitHub">
+              <Icons.GitHub className="w-4 h-4" />
+            </a>
+            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors" title="LinkedIn">
+              <Icons.LinkedIn className="w-4 h-4" />
+            </a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

@@ -18,6 +18,7 @@ const envSchema = Joi.object({
   REDIS_HOST: Joi.string().default("127.0.0.1"),
   REDIS_PORT: Joi.number().default(6379),
   REDIS_PASSWORD: Joi.string().allow("").default(""),
+  REDIS_URL: Joi.string().allow("").optional(),
 
   JWT_ACCESS_SECRET: Joi.string().min(16).required(),
   JWT_ACCESS_EXPIRES_IN: Joi.string().default("15m"),
@@ -56,6 +57,7 @@ module.exports = {
     host: envVars.REDIS_HOST,
     port: envVars.REDIS_PORT,
     password: envVars.REDIS_PASSWORD || undefined,
+    url: envVars.REDIS_URL || undefined,
   },
 
   jwt: {

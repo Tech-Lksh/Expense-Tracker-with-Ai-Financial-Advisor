@@ -141,7 +141,7 @@ export const MapViewer = () => {
     }
   }, [mapData]);
 
-  // Update Route Lines connecting user to all geotagged expenses
+  // Update Route Lines connecting user to all geotagged expenses directly
   useEffect(() => {
     const map = mapInstanceRef.current;
     const routesGroup = routesGroupRef.current;
@@ -150,8 +150,8 @@ export const MapViewer = () => {
     // Clear existing route lines
     routesGroup.clearLayers();
 
-    // Query and draw road routes asynchronously
-    mapData.forEach(async (exp) => {
+    // Draw direct tracking lines
+    mapData.forEach((exp) => {
       if (!exp.location || !exp.location.coordinates) return;
 
       const [lng, lat] = exp.location.coordinates;
@@ -161,35 +161,14 @@ export const MapViewer = () => {
       const userLatLng = [userCoords.lat, userCoords.lng];
       const color = '#3b82f6';
 
-      let routeLatLngs = [userLatLng, expenseLatLng]; // default straight line fallback
-      let distanceText = '';
+      const routeLatLngs = [userLatLng, expenseLatLng];
+      
+      const distance = map.distance(userLatLng, expenseLatLng);
+      const distanceText = distance > 1000 
+        ? `${(distance / 1000).toFixed(2)} km (direct)` 
+        : `${Math.round(distance)} m (direct)`;
 
-      try {
-        const response = await fetch(
-          `https://router.project-osrm.org/route/v1/driving/${userCoords.lng},${userCoords.lat};${lng},${lat}?overview=full&geometries=geojson`
-        );
-        const routeData = await response.json();
-        
-        if (routeData.code === 'Ok' && routeData.routes && routeData.routes.length > 0) {
-          const route = routeData.routes[0];
-          routeLatLngs = route.geometry.coordinates.map(coord => [coord[1], coord[0]]);
-          const distanceMeters = route.distance;
-          distanceText = distanceMeters > 1000 
-            ? `${(distanceMeters / 1000).toFixed(2)} km (by road)` 
-            : `${Math.round(distanceMeters)} m (by road)`;
-        }
-      } catch (err) {
-        console.warn('OSRM routing request failed, falling back to direct line:', err.message);
-      }
-
-      if (!distanceText) {
-        const distance = map.distance(userLatLng, expenseLatLng);
-        distanceText = distance > 1000 
-          ? `${(distance / 1000).toFixed(2)} km (direct)` 
-          : `${Math.round(distance)} m (direct)`;
-      }
-
-      // Draw custom dual-line for premium glowing road appearance
+      // Draw custom dual-line for premium glowing appearance
       const glowPolyline = window.L.polyline(routeLatLngs, {
         color: color,
         weight: 8,
@@ -242,7 +221,6 @@ export const MapViewer = () => {
           map.setView([latitude, longitude], 16);
 
           const userName = user?.name || 'User';
-          const userChar = user?.name ? user.name.charAt(0).toUpperCase() : '👤';
 
           const userIcon = window.L.divIcon({
             className: 'user-location-marker-container',
@@ -254,9 +232,11 @@ export const MapViewer = () => {
                 </div>
                 <!-- Pulse Effect -->
                 <div style="position: absolute; width: 32px; height: 32px; border-radius: 50%; background-color: rgba(59, 130, 246, 0.4); animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite; z-index: -1;"></div>
-                <!-- Marker Circle with Character -->
-                <div style="background-color: #3b82f6; width: 32px; height: 32px; border: 3px solid #e0f2fe; border-radius: 50%; box-shadow: 0 0 15px rgba(59, 130, 246, 0.7); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; color: #ffffff; font-family: 'Inter', sans-serif;">
-                  ${userChar}
+                <!-- Marker Circle with User Icon -->
+                <div style="background-color: #3b82f6; width: 32px; height: 32px; border: 3px solid #e0f2fe; border-radius: 50%; box-shadow: 0 0 15px rgba(59, 130, 246, 0.7); display: flex; align-items: center; justify-content: center;">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18" style="color: #ffffff;">
+                    <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd" />
+                  </svg>
                 </div>
               </div>
             `,
