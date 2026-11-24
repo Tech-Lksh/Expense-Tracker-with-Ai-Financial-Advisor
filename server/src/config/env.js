@@ -26,7 +26,7 @@ const envSchema = Joi.object({
   JWT_REFRESH_EXPIRES_IN: Joi.string().default("7d"),
   COOKIE_DOMAIN: Joi.string().default("localhost"),
 
-  GOOGLE_MAPS_API_KEY: Joi.string().required(),
+  GOOGLE_MAPS_API_KEY: Joi.string().allow("").optional(),
 
   RATE_LIMIT_WINDOW_MS: Joi.number().default(900000),
   RATE_LIMIT_MAX_REQUESTS: Joi.number().default(200),

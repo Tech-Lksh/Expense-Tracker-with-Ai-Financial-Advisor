@@ -139,7 +139,7 @@ npm install
 
 # 2. Copy the env template and fill in real values
 cp .env.example .env
-# at minimum set: MONGO_URI, JWT_ACCESS_SECRET, JWT_REFRESH_SECRET, GOOGLE_MAPS_API_KEY
+# at minimum set: CLIENT_URL, MONGO_URI, JWT_ACCESS_SECRET, JWT_REFRESH_SECRET, GOOGLE_MAPS_API_KEY
 
 # 3. Start MongoDB + Redis locally (or use docker-compose, see below)
 
@@ -173,6 +173,7 @@ See [`.env.example`](./.env.example) for the full list with comments. Required k
 | `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` | Must be long, random, and different from each other |
 | `GOOGLE_MAPS_API_KEY` | From Google Cloud Console |
 | `CLIENT_URL` | Frontend origin, used for CORS |
+| `GEMINI_API_KEY` | Optional; enables open-ended AI advisor responses |
 
 The app **fails fast on boot** (`src/config/env.js`) if a required variable is missing — no silently broken deployments.
 
