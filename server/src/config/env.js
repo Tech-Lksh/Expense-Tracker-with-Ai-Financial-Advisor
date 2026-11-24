@@ -11,10 +11,16 @@ const envSchema = Joi.object({
   NODE_ENV: Joi.string().valid("development", "production", "test").default("development"),
   PORT: Joi.number().default(5000),
   // Origins are compared byte-for-byte by browsers; normalize a common
-  // deployment mistake so CLIENT_URL works with or without a trailing slash.
+  // deployment mistake so CLIENT_URL works with or without a trailing slash,
+  // and supports comma-separated origin lists.
   CLIENT_URL: Joi.string()
-    .uri()
-    .custom((value) => value.replace(/\/+$/, ""))
+    .trim()
+    .custom((value) => {
+      return value
+        .split(",")
+        .map((url) => url.trim().replace(/\/+$/, ""))
+        .join(",");
+    })
     .required(),
   API_VERSION: Joi.string().default("v1"),
 

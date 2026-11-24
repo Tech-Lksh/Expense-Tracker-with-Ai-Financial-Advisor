@@ -10,7 +10,7 @@ function setRefreshCookie(res, refreshToken) {
   const cookieOpts = {
     httpOnly: true,
     secure: isProd,
-    sameSite: isProd ? "strict" : "lax",
+    sameSite: isProd ? "none" : "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   };
   // Browsers silently drop cookies with an explicit "localhost" domain in
