@@ -1,3 +1,12 @@
+// Suppress harmless BullMQ advisory about Upstash's eviction policy
+const originalConsoleWarn = console.warn;
+console.warn = (...args) => {
+  if (typeof args[0] === "string" && args[0].includes("Eviction policy is")) {
+    return;
+  }
+  originalConsoleWarn.apply(console, args);
+};
+
 const app = require("./app");
 const { port, env } = require("./config/env");
 const { connectDB, disconnectDB } = require("./config/db");
