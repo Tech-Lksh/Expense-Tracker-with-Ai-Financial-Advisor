@@ -1,16 +1,28 @@
 const { Queue } = require("bullmq");
 const { createRedisConnection } = require("../../config/redis");
 
-const connection = createRedisConnection({ forBullMQ: true });
+let connection = null;
+let recurringExpenseQueue = null;
+let budgetAlertQueue = null;
 
-// Recurring expenses: a repeatable job that ticks periodically and inserts
-// any RecurringRule whose nextRunDate has passed.
-const recurringExpenseQueue = new Queue("recurring-expense", { connection });
+function getQueues() {
+  if (!connection) {
+    connection = createRedisConnection({ forBullMQ: true });
+    recurringExpenseQueue = new Queue("recurring-expense", { connection });
+    budgetAlertQueue = new Queue("budget-alert", { connection });
+  }
+  return { connection, recurringExpenseQueue, budgetAlertQueue };
+}
 
-// Budget alert sweep: a periodic safety-net scan, complementing the
-// real-time check that already runs inline when an expense is created
-// (budget.service.checkAndAlertIfNeeded). Catches edge cases like a budget
-// created *after* expenses already crossed the threshold for the month.
-const budgetAlertQueue = new Queue("budget-alert", { connection });
-
-module.exports = { connection, recurringExpenseQueue, budgetAlertQueue };
+module.exports = {
+  getQueues,
+  get connection() {
+    return getQueues().connection;
+  },
+  get recurringExpenseQueue() {
+    return getQueues().recurringExpenseQueue;
+  },
+  get budgetAlertQueue() {
+    return getQueues().budgetAlertQueue;
+  },
+};

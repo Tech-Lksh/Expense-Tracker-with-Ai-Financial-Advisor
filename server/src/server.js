@@ -1,7 +1,7 @@
 const app = require("./app");
 const { port, env } = require("./config/env");
 const { connectDB, disconnectDB } = require("./config/db");
-const { redisClient } = require("./config/redis");
+const { redisClient, initRedis } = require("./config/redis");
 const { startJobScheduler } = require("./business/jobs/jobScheduler");
 const logger = require("./config/logger");
 
@@ -12,16 +12,15 @@ async function bootstrap() {
   await connectDB();
   logger.info(`Environment: ${env}`);
 
+  // Safely check and initialize Redis (or activate fallback mode if Redis is offline)
+  const isRedisAvailable = await initRedis();
 
   httpServer = app.listen(port, () => {
     logger.info(`Server listening on port ${port}`);
   });
 
-  // Background workers + repeatable jobs are part of the same process for
-  // simplicity here; in a larger production deployment these would run as
-  // a separate worker dyno/pod so a traffic spike on the API never starves
-  // job processing (and vice versa).
-  workers = await startJobScheduler();
+  // Background workers + repeatable jobs only start if Redis is running
+  workers = await startJobScheduler(isRedisAvailable);
 }
 
 async function shutdown(signal) {
@@ -33,11 +32,13 @@ async function shutdown(signal) {
       logger.info("HTTP server closed");
     }
 
-    if (workers.recurringWorker) await workers.recurringWorker.close();
-    if (workers.budgetWorker) await workers.budgetWorker.close();
+    if (workers?.recurringWorker) await workers.recurringWorker.close();
+    if (workers?.budgetWorker) await workers.budgetWorker.close();
 
     await disconnectDB();
-    redisClient.disconnect();
+    if (redisClient && typeof redisClient.disconnect === "function") {
+      redisClient.disconnect();
+    }
 
     logger.info("Shutdown complete");
     process.exit(0);
