@@ -10,7 +10,12 @@ dotenv.config({ path: path.resolve(process.cwd(), envFile) });
 const envSchema = Joi.object({
   NODE_ENV: Joi.string().valid("development", "production", "test").default("development"),
   PORT: Joi.number().default(5000),
-  CLIENT_URL: Joi.string().uri().required(),
+  // Origins are compared byte-for-byte by browsers; normalize a common
+  // deployment mistake so CLIENT_URL works with or without a trailing slash.
+  CLIENT_URL: Joi.string()
+    .uri()
+    .custom((value) => value.replace(/\/+$/, ""))
+    .required(),
   API_VERSION: Joi.string().default("v1"),
 
   MONGO_URI: Joi.string().required(),
