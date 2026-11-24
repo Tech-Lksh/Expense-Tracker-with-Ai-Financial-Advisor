@@ -1,4 +1,5 @@
-const { getQueues } = require("../queues");
+const { createQueues } = require("../queues");
+const { createRedisConnection } = require("../../config/redis");
 const { startRecurringExpenseWorker } = require("./recurringExpense.job");
 const { startBudgetAlertWorker } = require("./budgetAlert.job");
 const logger = require("../../config/logger");
@@ -15,7 +16,8 @@ async function startJobScheduler(isRedisAvailable = false) {
   }
 
   try {
-    const { recurringExpenseQueue, budgetAlertQueue } = getQueues();
+    const connection = createRedisConnection({ forBullMQ: true });
+    const { recurringExpenseQueue, budgetAlertQueue } = createQueues(connection);
 
     await recurringExpenseQueue.add(
       "tick",
@@ -37,12 +39,12 @@ async function startJobScheduler(isRedisAvailable = false) {
       }
     );
 
-    const recurringWorker = startRecurringExpenseWorker();
-    const budgetWorker = startBudgetAlertWorker();
+    const recurringWorker = startRecurringExpenseWorker(connection);
+    const budgetWorker = startBudgetAlertWorker(connection);
 
     logger.info("Job scheduler started: recurring-expense (hourly), budget-alert (daily)");
 
-    return { recurringWorker, budgetWorker };
+    return { recurringWorker, budgetWorker, connection };
   } catch (err) {
     logger.warn(`Failed to start BullMQ job scheduler: ${err.message}. Continuing without background workers.`);
     return { recurringWorker: null, budgetWorker: null };

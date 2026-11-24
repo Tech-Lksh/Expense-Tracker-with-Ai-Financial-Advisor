@@ -1,5 +1,4 @@
 const { Worker } = require("bullmq");
-const { connection } = require("../queues");
 const budgetRepository = require("../../data/repositories/budget.repository");
 const expenseRepository = require("../../data/repositories/expense.repository");
 const notificationService = require("../services/notification.service");
@@ -20,7 +19,7 @@ function monthRange(month, year) {
  * threshold for the month, since no new expense write would otherwise
  * trigger a re-check.
  */
-function startBudgetAlertWorker() {
+function startBudgetAlertWorker(connection) {
   const worker = new Worker(
     "budget-alert",
     async () => {

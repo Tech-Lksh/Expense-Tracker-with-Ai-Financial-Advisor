@@ -22,6 +22,15 @@ function attachClientListeners(client, label = "Redis") {
   return client;
 }
 
+function getResolvedRedisUrl() {
+  if (!redisConfig.url) return null;
+  // Upstash requires TLS (rediss://)
+  if (redisConfig.url.includes("upstash.io") && redisConfig.url.startsWith("redis://")) {
+    return redisConfig.url.replace(/^redis:\/\//, "rediss://");
+  }
+  return redisConfig.url;
+}
+
 /**
  * Probes whether a live Redis server is reachable with a short timeout.
  * Returns true if Redis is running, false otherwise.
@@ -29,9 +38,10 @@ function attachClientListeners(client, label = "Redis") {
 async function checkRedisAvailability() {
   if (env === "test") return false;
 
-  const probeClient = redisConfig.url
-    ? new Redis(redisConfig.url, {
-        connectTimeout: 800,
+  const redisUrl = getResolvedRedisUrl();
+  const probeClient = redisUrl
+    ? new Redis(redisUrl, {
+        connectTimeout: 3000,
         maxRetriesPerRequest: 1,
         lazyConnect: true,
         retryStrategy: () => null,
@@ -77,8 +87,9 @@ function createRedisConnection({ forBullMQ = false } = {}) {
     },
   };
 
-  const client = redisConfig.url
-    ? new Redis(redisConfig.url, options)
+  const redisUrl = getResolvedRedisUrl();
+  const client = redisUrl
+    ? new Redis(redisUrl, options)
     : new Redis({
         host: redisConfig.host,
         port: redisConfig.port,

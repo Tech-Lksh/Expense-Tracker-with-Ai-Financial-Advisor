@@ -1,5 +1,4 @@
 const { Worker } = require("bullmq");
-const { connection } = require("../queues");
 const recurringRuleRepository = require("../../data/repositories/recurringRule.repository");
 const expenseRepository = require("../../data/repositories/expense.repository");
 const userRepository = require("../../data/repositories/user.repository");
@@ -14,7 +13,7 @@ const logger = require("../../config/logger");
  * the rule's saved location, so e.g. a monthly gym membership keeps its
  * gym's map pin), and rolls nextRunDate forward.
  */
-function startRecurringExpenseWorker() {
+function startRecurringExpenseWorker(connection) {
   const worker = new Worker(
     "recurring-expense",
     async () => {

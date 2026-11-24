@@ -1,28 +1,18 @@
 const { Queue } = require("bullmq");
-const { createRedisConnection } = require("../../config/redis");
 
-let connection = null;
-let recurringExpenseQueue = null;
-let budgetAlertQueue = null;
+/**
+ * Creates BullMQ queues with safe error handlers.
+ * Called lazily by jobScheduler only when Redis is verified to be online.
+ */
+function createQueues(connection) {
+  const recurringExpenseQueue = new Queue("recurring-expense", { connection });
+  const budgetAlertQueue = new Queue("budget-alert", { connection });
 
-function getQueues() {
-  if (!connection) {
-    connection = createRedisConnection({ forBullMQ: true });
-    recurringExpenseQueue = new Queue("recurring-expense", { connection });
-    budgetAlertQueue = new Queue("budget-alert", { connection });
-  }
-  return { connection, recurringExpenseQueue, budgetAlertQueue };
+  // Attach error listeners to queues so unhandled connection events don't crash Node
+  recurringExpenseQueue.on("error", () => {});
+  budgetAlertQueue.on("error", () => {});
+
+  return { recurringExpenseQueue, budgetAlertQueue };
 }
 
-module.exports = {
-  getQueues,
-  get connection() {
-    return getQueues().connection;
-  },
-  get recurringExpenseQueue() {
-    return getQueues().recurringExpenseQueue;
-  },
-  get budgetAlertQueue() {
-    return getQueues().budgetAlertQueue;
-  },
-};
+module.exports = { createQueues };
