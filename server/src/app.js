@@ -19,12 +19,15 @@ const errorMiddleware = require("./presentation/middlewares/error.middleware");
 const ApiResponse = require("./utils/ApiResponse");
 
 const app = express();
+// Browsers send origins without a trailing slash. Normalize the configured
+// frontend URL before CORS compares it with the request Origin header.
+const allowedClientOrigin = clientUrl.replace(/\/+$/, "");
 
 // ---- Security & parsing middleware (presentation-layer cross-cutting concerns) ----
 app.use(helmet());
 app.use(
   cors({
-    origin: clientUrl,
+    origin: allowedClientOrigin,
     credentials: true,
   })
 );
