@@ -40,7 +40,7 @@ const envSchema = Joi.object({
   GOOGLE_MAPS_API_KEY: Joi.string().allow("").optional(),
 
   RATE_LIMIT_WINDOW_MS: Joi.number().default(900000),
-  RATE_LIMIT_MAX_REQUESTS: Joi.number().default(200),
+  RATE_LIMIT_MAX_REQUESTS: Joi.number().default(3000),
 
   LOG_LEVEL: Joi.string().default("info"),
 }).unknown(true);

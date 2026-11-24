@@ -20,6 +20,9 @@ const ApiResponse = require("./utils/ApiResponse");
 
 const app = express();
 
+// Trust reverse proxy (Render, Cloudflare, Heroku) so req.ip reflects real client IP
+app.set("trust proxy", 1);
+
 // Parse configured origins (supports comma-separated URLs and trims trailing slashes)
 const configuredOrigins = (clientUrl || "")
   .split(",")
